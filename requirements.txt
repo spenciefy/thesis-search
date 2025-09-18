@@ -2,6 +2,5 @@ streamlit
 requests
 pandas
 openai
-python-dotenv
 exa-py
 st-gsheets-connection

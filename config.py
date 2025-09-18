@@ -1,18 +1,21 @@
 """
 Configuration settings for the USV Investment Research Tool
 """
-import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
+import streamlit as st
 
 # Parallel.ai API configuration
-PARALLEL_API_KEY = os.getenv("PARALLEL_API_KEY", "")
+try:
+    PARALLEL_API_KEY = st.secrets["parallel_api_key"]
+except (KeyError, AttributeError):
+    PARALLEL_API_KEY = ""
+
 BASE_URL = "https://api.parallel.ai"
 
 # OpenRouter configuration
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+try:
+    OPENROUTER_API_KEY = st.secrets["openrouter_api_key"]
+except (KeyError, AttributeError):
+    OPENROUTER_API_KEY = ""
 
 # Default settings
 DEFAULT_RESULT_LIMIT = 10
