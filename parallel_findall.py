@@ -419,10 +419,16 @@ def render_parallel_findall_tab(tab_type="new_search"):
 
                             st.markdown(f"**Found {len(display_df)} companies:**")
 
+                            # Display results as a Streamlit table first
+                            st.dataframe(display_df, use_container_width=True)
+
+                            st.markdown("---")
+                            st.markdown("### Company Details")
+
                             # Create compact company list
-                            for idx, row in display_df.iterrows():
-                                company_name = row.get('Name', 'Unknown Company')
-                                company_url = row.get('URL', '')
+                            for _, company_row in display_df.iterrows():
+                                company_name = company_row.get('Name', 'Unknown Company')
+                                company_url = company_row.get('URL', '')
 
                                 # Add company name with hyperlink - make it bigger
                                 if company_url and company_url.strip() and company_url != '':
@@ -442,7 +448,7 @@ def render_parallel_findall_tab(tab_type="new_search"):
                                 details = []
                                 for col in display_df.columns:
                                     if col not in ['Name', 'URL']:
-                                        value = row.get(col, '')
+                                        value = company_row.get(col, '')
                                         if value and str(value).strip() and str(value).lower() not in ['skipped', 'nan']:
                                             clean_col = col.replace('_', ' ').title()
                                             # Keep full values, no truncation
