@@ -4,7 +4,6 @@ Thesis extraction functionality using OpenRouter API
 import streamlit as st
 import os
 from openai import OpenAI
-from config import OPENROUTER_API_KEY
 
 
 def load_meeting_transcripts():
@@ -51,14 +50,17 @@ def extract_thesis_and_queries(content):
     Returns:
         OpenAI stream response or None if error
     """
-    if not OPENROUTER_API_KEY:
-        st.error("OpenRouter API key not found. Please set the OPENROUTER_API_KEY environment variable.")
+    # Get API key from secrets
+    try:
+        openrouter_api_key = st.secrets["openrouter_api_key"]
+    except (KeyError, AttributeError):
+        st.error("OpenRouter API key not found in secrets. Please configure openrouter_api_key in .streamlit/secrets.toml")
         return None
-    
+
     try:
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=OPENROUTER_API_KEY,
+            api_key=openrouter_api_key,
         )
         
         prompt = """
@@ -122,9 +124,14 @@ def render_thesis_extraction_tab():
     """
     st.header("Thesis Extraction & Company Search")
 
-    if not OPENROUTER_API_KEY:
-        st.warning("⚠️ OpenRouter API key not found. Please set the OPENROUTER_API_KEY environment variable to use this feature.")
-        st.code("export OPENROUTER_API_KEY=your_api_key_here")
+    # Check if API key is available
+    try:
+        openrouter_api_key = st.secrets["openrouter_api_key"]
+        api_key_available = True
+    except (KeyError, AttributeError):
+        openrouter_api_key = None
+        api_key_available = False
+        st.warning("⚠️ OpenRouter API key not found. Please configure openrouter_api_key in .streamlit/secrets.toml to use this feature.")
 
     # Load available meeting transcripts
     transcripts = load_meeting_transcripts()
@@ -155,7 +162,7 @@ def render_thesis_extraction_tab():
     
     extract_button = st.button("Extract Theses", type="primary")
     
-    if extract_button and content_input and OPENROUTER_API_KEY:
+    if extract_button and content_input and api_key_available:
         st.subheader("📋 Generated Theses & Search Queries")
         
         # Create containers for streaming output
@@ -193,5 +200,5 @@ def render_thesis_extraction_tab():
                 
     elif extract_button and not content_input:
         st.warning("Please enter some content to analyze.")
-    elif extract_button and not OPENROUTER_API_KEY:
-        st.error("OpenRouter API key is required. Please set the OPENROUTER_API_KEY environment variable.")
+    elif extract_button and not api_key_available:
+        st.error("OpenRouter API key is required. Please configure openrouter_api_key in .streamlit/secrets.toml")

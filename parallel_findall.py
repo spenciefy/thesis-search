@@ -5,9 +5,11 @@ import streamlit as st
 import requests
 import time
 import pandas as pd
-from config import PARALLEL_API_KEY, BASE_URL
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
+
+# Configuration
+PARALLEL_BASE_URL = "https://api.parallel.ai"
 
 
 # Note: Parallel.ai API does not provide an endpoint to list previous runs
@@ -150,13 +152,15 @@ def get_findall_run_by_id(run_id):
     Returns:
         dict: Run data with results or None if error
     """
-    if not PARALLEL_API_KEY:
+    try:
+        parallel_api_key = st.secrets["parallel_api_key"]
+    except (KeyError, AttributeError):
         return None
     
     try:
         response = requests.get(
-            f"{BASE_URL}/v1beta/findall/runs/{run_id}",
-            headers={"x-api-key": PARALLEL_API_KEY}
+            f"{PARALLEL_BASE_URL}/v1beta/findall/runs/{run_id}",
+            headers={"x-api-key": parallel_api_key}
         )
         response.raise_for_status()
         
@@ -173,14 +177,21 @@ def get_findall_run_by_id(run_id):
 def search_findall(query, result_limit=10):
     """
     Search using Parallel.ai FindAll API
-    
+
     Args:
         query (str): Search query
         result_limit (int): Maximum number of results to return
-        
+
     Returns:
         tuple: (results, columns, run_id) or (None, None, None) if error
     """
+    # Get API key from secrets
+    try:
+        parallel_api_key = st.secrets["parallel_api_key"]
+    except (KeyError, AttributeError):
+        st.error("Parallel API key not found in secrets. Please configure parallel_api_key in .streamlit/secrets.toml")
+        return None, None, None
+
     try:
         progress_bar = st.progress(0)
         
@@ -192,8 +203,8 @@ def search_findall(query, result_limit=10):
         progress_bar.progress(25)
 
         ingest_response = requests.post(
-            f"{BASE_URL}/v1beta/findall/ingest",
-            headers={"x-api-key": PARALLEL_API_KEY},
+            f"{PARALLEL_BASE_URL}/v1beta/findall/ingest",
+            headers={"x-api-key": parallel_api_key},
             json={"query": query}
         )
         ingest_response.raise_for_status()
@@ -207,8 +218,8 @@ def search_findall(query, result_limit=10):
         progress_bar.progress(50)
 
         run_response = requests.post(
-            f"{BASE_URL}/v1beta/findall/runs",
-            headers={"x-api-key": PARALLEL_API_KEY},
+            f"{PARALLEL_BASE_URL}/v1beta/findall/runs",
+            headers={"x-api-key": parallel_api_key},
             json={
                 "findall_spec": findall_spec,
                 "processor": "base",
@@ -228,8 +239,8 @@ def search_findall(query, result_limit=10):
         polling_count = 0
         while True:
             poll_response = requests.get(
-                f"{BASE_URL}/v1beta/findall/runs/{findall_id}",
-                headers={"x-api-key": PARALLEL_API_KEY}
+                f"{PARALLEL_BASE_URL}/v1beta/findall/runs/{findall_id}",
+                headers={"x-api-key": parallel_api_key}
             )
             poll_response.raise_for_status()
 
