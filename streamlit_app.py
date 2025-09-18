@@ -19,7 +19,7 @@ def main():
    
    **📝 Instructions:**
    1. Extract theses from content and generate thesis based search queries
-   2. Copy and paste a search query into "New Search" to get a list of companies, powered by parallel.ai's FindAll api (or I recommend using Parallel's interface directly: https://platform.parallel.ai/find-all)
+   2. Copy and paste a search query into "New Search" to get a list of companies, powered by parallel.ai's FindAll API (or I recommend using Parallel's interface directly: https://platform.parallel.ai/find-all)
     """)
 
     # Create tabs for different functionalities

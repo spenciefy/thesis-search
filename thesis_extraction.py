@@ -144,9 +144,15 @@ def render_thesis_extraction_tab():
 
     # Sample transcript selector
     if transcripts:
+        # Set default to August 22 meeting if it exists
+        default_index = 0
+        if "USV Climate Weekly - August 22, 2025" in transcripts:
+            default_index = list(transcripts.keys()).index("USV Climate Weekly - August 22, 2025") + 1  # +1 for "Paste your own content..."
+
         selected_transcript = st.selectbox(
-            "Select a sample meeting transcript or paste any content below:",
-            options=["Paste your own content..."] + list(transcripts.keys())
+            "Select a sample meeting transcript, blog post, or paste any content below:",
+            options=["Paste your own content..."] + list(transcripts.keys()),
+            index=default_index
         )
 
         # Handle sample loading
@@ -160,7 +166,7 @@ def render_thesis_extraction_tab():
         height=200
     )
     
-    extract_button = st.button("Extract Theses", type="primary")
+    extract_button = st.button("Extract Theses and Search Queries", type="primary")
     
     if extract_button and content_input and api_key_available:
         st.subheader("📋 Generated Theses & Search Queries")
